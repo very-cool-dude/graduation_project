@@ -1,0 +1,203 @@
+openapi: 3.0.3
+info:
+  title: EMR Microservices API
+  version: "1.0"
+  description: |
+    API для микросервисной системы генерации медицинских отчётов по аудио.
+
+servers:
+  - url: http://localhost:8000
+    description: API Gateway
+
+tags:
+  - name: auth
+    description: Аутентификация и роли
+  - name: reports
+    description: Генерация и шаблоны отчётов
+  - name: transcribe
+    description: Распознавание речи (STT)
+  - name: llm
+    description: Генерация текста LLM
+
+paths:
+  /auth:
+    post:
+      tags:
+        - auth
+      summary: Авторизация пользователя
+      requestBody:
+        description: Логин и пароль пользователя
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+      responses:
+        "200":
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Неверные данные
+        "500":
+          description: Внутренняя ошибка
+
+  /templates:
+    get:
+      tags:
+        - reports
+      summary: Получить список шаблонов отчётов
+      responses:
+        "200":
+          description: Список шаблонов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TemplateInfo"
+
+  /template/{filename}:
+    get:
+      tags:
+        - reports
+      summary: Получить файл шаблона (docx, prompt, pdf)
+      parameters:
+        - in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+          description: Имя файла шаблона
+      responses:
+        "200":
+          description: Файл шаблона (binary)
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Файл не найден
+
+  /process:
+    post:
+      tags:
+        - reports
+      summary: Генерация отчёта на основе аудио и шаблона
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                template_name:
+                  type: string
+                prompt:
+                  type: string
+      responses:
+        "200":
+          description: Готовый отчёт (docx)
+          content:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Ошибка валидации
+        "500":
+          description: Внутренняя ошибка
+
+  /transcribe:
+    post:
+      tags:
+        - transcribe
+      summary: Распознать речь из аудио
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Результат STT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+
+  /generate:
+    post:
+      tags:
+        - llm
+      summary: Генерация вывода LLM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LLMRequest"
+      responses:
+        "200":
+          description: Ответ LLM
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LLMResponse"
+
+components:
+  schemas:
+    AuthRequest:
+      type: object
+      properties:
+        login:
+          type: string
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        role:
+          type: string
+
+    TemplateInfo:
+      type: object
+      properties:
+        docx:
+          type: string
+        prompt:
+          type: string
+        pdf:
+          type: string
+
+    LLMRequest:
+      type: object
+      properties:
+        prompt:
+          type: string
+        transcription:
+          type: string
+
+    LLMResponse:
+      type: object
+      properties:
+        answer:
+          type: object
+          additionalProperties: true
+
