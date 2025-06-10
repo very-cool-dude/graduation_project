@@ -37,7 +37,7 @@ services:
       - ./services/generator_service:/app
     command: uvicorn app.generator:app --host 0.0.0.0 --port 8005
     environment:
-      - HF_API_TOKEN=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
+      - HF_API_TOKEN=hf_token
 
   gateway_service:
     build:
