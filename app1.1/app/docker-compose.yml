@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  authorization_service:
+    build:
+      context: ./services/authorization_service
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/authorization_service:/app
+    command: uvicorn app.authorization:app --host 0.0.0.0 --port 8002
+
+  transcriber_service:
+    build:
+      context: ./services/transcriber_service
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./services/transcriber_service:/app
+    command: uvicorn app.transcriber:app --host 0.0.0.0 --port 8004
+
+  report_service:
+    build:
+      context: ./services/report_service
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./services/report_service:/app
+    command: uvicorn app.report:app --host 0.0.0.0 --port 8003
+
+  generator_service:
+    build:
+      context: ./services/generator_service
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./services/generator_service:/app
+    command: uvicorn app.generator:app --host 0.0.0.0 --port 8005
+    environment:
+      - HF_API_TOKEN=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
+
+  gateway_service:
+    build:
+      context: ./services/gateway_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/gateway_service:/app
+    depends_on:
+      - authorization_service
+      - transcriber_service
+      - report_service
+      - generator_service
+    command: uvicorn app.gateway:app --host 0.0.0.0 --port 8000

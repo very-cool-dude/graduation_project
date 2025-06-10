@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+aiofiles
+requests
+python-docx
+python-multipart

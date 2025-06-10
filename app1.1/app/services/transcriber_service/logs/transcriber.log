@@ -1,0 +1,4 @@
+2025-06-10 08:27:03,064 [INFO] Сервис transcriber запущен!
+2025-06-10 08:27:04,070 [INFO] HTTP Request: GET https://hf-audio-whisper-large-v3.hf.space/config "HTTP/1.1 200 OK"
+2025-06-10 08:27:04,561 [INFO] HTTP Request: GET https://hf-audio-whisper-large-v3.hf.space/info?serialize=False "HTTP/1.1 200 OK"
+2025-06-10 08:27:04,928 [INFO] HTTP Request: GET https://hf-audio-whisper-large-v3.hf.space/heartbeat/b8ef195b-9d53-40c6-85a7-a7d6ef6e0e4a "HTTP/1.1 200 OK"
